@@ -1,0 +1,38 @@
+﻿@rendermode InteractiveServer
+@page "/CadastroUser"
+
+
+
+<h3>CadastroUser</h3>
+
+<div>
+    <fieldset>
+        <legend>Cadastro de Usuário</legend>
+        <form>
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" class="form-control" id="nome" placeholder="Digite seu nome" @bind="Nome">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" placeholder="Digite seu email" @bind="Email">
+            </div>
+            <div class="form-group">
+                <label for="senha">Senha:</label>
+                <input type="password" class="form-control" id="senha" placeholder="Digite sua senha" @bind="Senha">
+            </div>
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+    </fieldset>
+
+</div>
+
+
+@code {
+
+    private int Id { get; set; }
+    private string Nome { get; set; } = string.Empty;
+    private string Email { get; set; } = string.Empty;
+    private string Senha { get; set; } = string.Empty;
+
+}
