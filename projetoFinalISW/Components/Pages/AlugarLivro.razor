@@ -1,5 +1,72 @@
-﻿<h3>AlugarLivro</h3>
+﻿@rendermode InteractiveServer
+@page "/AlugarLivro"
+
+@using projetoFinalISW.Components.Models
+@using projetoFinalISW.Components.Services
+
+@inject AluguelService AluguelService
+@inject AuthService AuthService
+
+<h3 class="mb-4">Livros Disponíveis</h3>
+
+@if (AuthService.UsuarioLogado == null)
+{
+    <div class="alert alert-warning">
+        Faça login para alugar um livro.
+    </div>
+}
+else if (livros.Count == 0)
+{
+    <div class="alert alert-info">
+        Nenhum livro disponível no momento.
+    </div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead class="table-primary">
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Editora</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var livro in livros)
+            {
+                <tr>
+                    <td>@livro.Titulo</td>
+                    <td>@livro.Autor</td>
+                    <td>@livro.Editora</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary"
+                                @onclick="() => Alugar(livro.Id)">
+                            Alugar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
+    List<Livro> livros = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        livros = await AluguelService.LivrosDisponiveis();
+    }
+
+    async Task Alugar(int livroId)
+    {
+        if (AuthService.UsuarioLogado == null)
+            return;
+
+        await AluguelService.AlugarLivro(livroId, AuthService.UsuarioLogado.Id);
+
+        livros = await AluguelService.LivrosDisponiveis();
+    }
 }

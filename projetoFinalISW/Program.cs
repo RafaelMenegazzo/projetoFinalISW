@@ -1,4 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using projetoFinalISW.Components;
+using projetoFinalISW.Components.Data;
+using projetoFinalISW.Components.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +10,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("PostgresConnection")));
+
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<LivroService>();
+builder.Services.AddScoped<AluguelService>();
+builder.Services.AddScoped<AuthService>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    db.Database.Migrate();
+}
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

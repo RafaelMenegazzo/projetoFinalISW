@@ -4,10 +4,10 @@ namespace projetoFinalISW.Components.Models
 {
     public class Criptografia
     {
-        public string criptografarSenha(Usuario user)
+        public string criptografarSenha(string senha)
         {
             var passwordHasher = new PasswordHasher<Usuario>();
-            return passwordHasher.HashPassword(null, user.getSenha());
+            return passwordHasher.HashPassword(null, senha);
         }
 
         public bool verificarSenha(string senha, string senhaCriptografada )

@@ -1,24 +1,31 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace projetoFinalISW.Components.Models
 {
-    public class Usuario : IdentityUser
+    public class Usuario
     {
-        private int Id {get;set;}
-        private string Nome { get; set; } = string.Empty;
-        private string Email { get; set; } = string.Empty;
-        private string Senha { get; set; } = string.Empty;
-        private List<Livro> livros { get; set; } = new List<Livro>();
+        public int Id { get; set; }
 
+        [Required]
+        [MaxLength(50)]
+        public string Nome { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        [MaxLength(100)]
+        public string Email { get; set; } = string.Empty;
+
+        // Aqui será armazenado apenas o hash
+        public string SenhaHash { get; set; }
+
+        public ICollection<Aluguel> Alugueis { get; set; }
+            = new List<Aluguel>();
         public int getId()
         {
             return this.Id;
         }
 
-        public List<Livro> getLivros()
-        {
-            return this.livros;
-        }
 
         public string getNome()
         {
@@ -29,11 +36,6 @@ namespace projetoFinalISW.Components.Models
         {
             return this.Email;
         }
-
-        public string getSenha()
-        {
-            return this.Senha;
-        }   
 
         public string setNome(string nome)
         {
@@ -55,15 +57,7 @@ namespace projetoFinalISW.Components.Models
             return this.Email;
         }
         
-        public string setSenha(string senha)
-        {
-            if (senha.Length < 6 || senha.Length > 12)
-            {
-                throw new Exception("A senha do usuário deve ter entre 6 e 12 caracteres.");
-            }
-            this.Senha = senha;
-            return this.Senha;
-        }
+   
 
         
 

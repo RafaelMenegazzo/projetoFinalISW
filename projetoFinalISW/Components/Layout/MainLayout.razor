@@ -1,18 +1,25 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="min-vh-100 bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/Home">Biblioteca Online</a>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/Perfil">Perfil</a>
+                <a class="nav-link" href="/AlugarLivro">Alugar Livro</a>
+                <a class="nav-link" href="/CadastrarLivro">Cadastrar Livro</a>
+                <a class="nav-link" href="/Login">Login</a>
+            </div>
         </div>
+    </nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="container py-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                @Body
+            </div>
+        </div>
     </main>
 </div>
 

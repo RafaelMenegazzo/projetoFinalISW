@@ -2,12 +2,19 @@
 {
     public class Aluguel
     {
-        private int Id_Aluguel { get; set; }
-        private int Id_Usuario { get; set; } = 0;
-        private int Id_Livro { get; set; } = 0;
-        private Usuario usuario { get; set; } = new Usuario();
-        private Livro livro { get; set; } = new Livro();
+        public int Id { get; set; }
 
+        public int UsuarioId { get; set; }
+
+        public Usuario Usuario { get; set; } = null!;
+
+        public int LivroId { get; set; }
+
+        public Livro Livro { get; set; } = null!;
+
+        public DateTime DataAluguel { get; set; }
+
+        public DateTime? DataDevolucao { get; set; }
 
     }
 }
