@@ -1,4 +1,5 @@
 ﻿@page "/Login"
+@rendermode InteractiveServer
 
 @using projetoFinalISW.Components.Services
 
@@ -46,22 +47,25 @@
                         Senha
                     </label>
 
-                    <InputText type="password"
-                               class="form-control"
+                    <InputText class="form-control"
+                               type="password"
                                placeholder="Digite sua senha"
                                @bind-Value="senha" />
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary"
+                    <button type="button"
+                            class="btn btn-primary"
                             disabled="@entrando"
                             @onclick="Entrar">
 
                         @(entrando ? "Entrando..." : "Entrar")
                     </button>
 
-                    <button class="btn btn-outline-primary"
+                    <button type="button"
+                            class="btn btn-outline-primary"
                             @onclick="IrParaCadastro">
+
                         Criar uma conta
                     </button>
                 </div>
@@ -75,7 +79,6 @@
 
             </div>
         </div>
-
     </div>
 </div>
 
@@ -108,8 +111,9 @@
 
         try
         {
-            var usuario =
-                await UsuarioService.DoLogin(email.Trim(), senha);
+            var usuario = await UsuarioService.DoLogin(
+                email.Trim(),
+                senha);
 
             if (usuario == null)
             {

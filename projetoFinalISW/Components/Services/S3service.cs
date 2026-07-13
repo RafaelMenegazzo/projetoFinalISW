@@ -31,7 +31,7 @@ namespace projetoFinalISW.Components.Services
             if (!TiposPermitidos.Contains(tipoConteudo))
             {
                 throw new InvalidOperationException(
-                    "A capa deve ser JPG, PNG ou WEBP.");
+                    "A capa deve estar no formato JPG, PNG ou WEBP.");
             }
 
             string bucket = ObterNomeBucket();
@@ -58,10 +58,16 @@ namespace projetoFinalISW.Components.Services
 
         public string ObterUrlTemporaria(string chave)
         {
+            if (string.IsNullOrWhiteSpace(chave))
+            {
+                throw new ArgumentException(
+                    "A chave da imagem não foi informada.");
+            }
+
             var requisicao = new GetPreSignedUrlRequest
             {
                 BucketName = ObterNomeBucket(),
-                Key = chave,
+                Key = chave.Trim(),
                 Expires = DateTime.UtcNow.AddHours(1),
                 Verb = HttpVerb.GET
             };
@@ -71,9 +77,31 @@ namespace projetoFinalISW.Components.Services
 
         private string ObterNomeBucket()
         {
-            return _configuration["AWS:BucketCapas"]
-                ?? throw new InvalidOperationException(
-                    "O nome do bucket S3 não foi configurado.");
+            string? bucket =
+                _configuration["AWS:BucketCapas"];
+
+            if (string.IsNullOrWhiteSpace(bucket))
+            {
+                throw new InvalidOperationException(
+                    "O nome do bucket não foi configurado em AWS:BucketCapas.");
+            }
+
+            bucket = bucket.Trim();
+
+            if (bucket.StartsWith("s3://",
+                    StringComparison.OrdinalIgnoreCase) ||
+                bucket.StartsWith("http://",
+                    StringComparison.OrdinalIgnoreCase) ||
+                bucket.StartsWith("https://",
+                    StringComparison.OrdinalIgnoreCase) ||
+                bucket.Contains('/'))
+            {
+                throw new InvalidOperationException(
+                    $"O valor '{bucket}' não é um nome de bucket válido. " +
+                    "Informe apenas: biblioteca-isw-capas-rafael");
+            }
+
+            return bucket;
         }
     }
 }
