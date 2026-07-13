@@ -5,9 +5,14 @@
 
 
 <h1>Biblioteca Online</h1>
+<br />
+ <p> A <b>biblioteca online</b> é um site de alocação de livros online. 
+     Descubra universos inteiros por meio de cada livro lido</p>
+<br />
+<p>Faça login para acessar o sistema</p>
+<hr style="color: blue"/>
 <button class="btn btn-primary" @onclick="NavigateToLogin">Login</button>
 <br />
-<button class="btn btn-primary" @onclick="NavigateToCadastro">Cadastrar</button>
 
 @code{
     [Inject]
@@ -15,9 +20,5 @@
     async private void NavigateToLogin()
     {
         Navigation.NavigateTo("/Login");
-    }
-    async private void NavigateToCadastro()
-    {
-       Navigation.NavigateTo("/Cadastro");
     }
 }
