@@ -27,6 +27,9 @@ namespace projetoFinalISW.Components.Models
 
         public bool Disponivel { get; set; } = true;
 
+        [MaxLength(500)]
+        public string? CapaChave { get; set; }
+
         public ICollection<Aluguel> Alugueis { get; set; }
             = new List<Aluguel>();
     }

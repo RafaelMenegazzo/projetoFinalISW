@@ -3,11 +3,11 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
 
-<button class="btn btn-primary" @onclick="NavigateToLogin">Click me</button>
-
-Welcome to your new app.
+<h1>Biblioteca Online</h1>
+<button class="btn btn-primary" @onclick="NavigateToLogin">Login</button>
+<br />
+<button class="btn btn-primary" @onclick="NavigateToCadastro">Cadastrar</button>
 
 @code{
     [Inject]
@@ -15,5 +15,9 @@ Welcome to your new app.
     async private void NavigateToLogin()
     {
         Navigation.NavigateTo("/Login");
+    }
+    async private void NavigateToCadastro()
+    {
+       Navigation.NavigateTo("/Cadastro");
     }
 }

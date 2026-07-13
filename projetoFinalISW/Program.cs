@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using projetoFinalISW.Components;
 using projetoFinalISW.Components.Data;
 using projetoFinalISW.Components.Services;
+using Amazon;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,22 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<LivroService>();
 builder.Services.AddScoped<AluguelService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddScoped<S3Service>();
+
+string regiaoAws =
+    builder.Configuration["AWS:Region"] ?? "us-east-1";
+
+builder.Services.AddSingleton<IAmazonS3>(_ =>
+    new AmazonS3Client(
+        RegionEndpoint.GetBySystemName(regiaoAws)));
+
+builder.Services.AddDefaultAWSOptions(
+    builder.Configuration.GetAWSOptions());
+
+builder.Services.AddAWSService<IAmazonS3>();
+
+builder.Services.AddScoped<S3Service>();
 
 var app = builder.Build();
 

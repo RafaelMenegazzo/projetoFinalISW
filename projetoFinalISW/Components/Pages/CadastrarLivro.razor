@@ -1,10 +1,12 @@
 ﻿@rendermode InteractiveServer
 @page "/CadastrarLivro"
 
+@using Microsoft.AspNetCore.Components.Forms
 @using projetoFinalISW.Components.Models
 @using projetoFinalISW.Components.Services
 
 @inject LivroService LivroService
+@inject S3Service S3Service
 
 <h3 class="mb-4">Cadastrar Livro</h3>
 
@@ -15,58 +17,193 @@
     <div class="row">
         <div class="col-md-8 mb-3">
             <label class="form-label">Título</label>
-            <InputText class="form-control" @bind-Value="livro.Titulo" />
+            <InputText class="form-control"
+                       @bind-Value="livro.Titulo" />
         </div>
 
         <div class="col-md-4 mb-3">
-            <label class="form-label">Ano de Publicação</label>
-            <InputNumber class="form-control" @bind-Value="livro.AnoPublicacao" />
+            <label class="form-label">Ano de publicação</label>
+            <InputNumber class="form-control"
+                         @bind-Value="livro.AnoPublicacao" />
         </div>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Sinopse</label>
-        <InputTextArea class="form-control" rows="4" @bind-Value="livro.Sinopse" />
+        <InputTextArea class="form-control"
+                       rows="4"
+                       @bind-Value="livro.Sinopse" />
     </div>
 
     <div class="row">
         <div class="col-md-4 mb-3">
             <label class="form-label">Autor</label>
-            <InputText class="form-control" @bind-Value="livro.Autor" />
+            <InputText class="form-control"
+                       @bind-Value="livro.Autor" />
         </div>
 
         <div class="col-md-4 mb-3">
             <label class="form-label">Editora</label>
-            <InputText class="form-control" @bind-Value="livro.Editora" />
+            <InputText class="form-control"
+                       @bind-Value="livro.Editora" />
         </div>
 
         <div class="col-md-4 mb-3">
             <label class="form-label">Gênero</label>
-            <InputText class="form-control" @bind-Value="livro.Genero" />
+            <InputText class="form-control"
+                       @bind-Value="livro.Genero" />
         </div>
     </div>
 
-    <div class="form-check mb-3">
-        <InputCheckbox class="form-check-input" @bind-Value="livro.Disponivel" />
-        <label class="form-check-label">Disponível para aluguel</label>
+    <div class="mb-3">
+        <label class="form-label">Capa do livro</label>
+
+        <InputFile class="form-control"
+                   OnChange="SelecionarCapa"
+                   accept=".jpg,.jpeg,.png,.webp" />
+
+        <div class="form-text">
+            JPG, PNG ou WEBP. Tamanho máximo: 5 MB.
+        </div>
     </div>
 
-    <button class="btn btn-primary">Salvar</button>
+    @if (!string.IsNullOrEmpty(previewUrl))
+    {
+        <div class="mb-3">
+            <img src="@previewUrl"
+                 alt="Pré-visualização da capa"
+                 class="img-thumbnail"
+                 style="width: 180px; height: 260px; object-fit: cover;" />
+        </div>
+    }
+
+    <div class="form-check mb-3">
+        <InputCheckbox class="form-check-input"
+                       @bind-Value="livro.Disponivel" />
+
+        <label class="form-check-label">
+            Disponível para aluguel
+        </label>
+    </div>
+
+    <button class="btn btn-primary"
+            disabled="@salvando">
+        @(salvando ? "Salvando..." : "Salvar")
+    </button>
 
     @if (!string.IsNullOrEmpty(mensagem))
     {
-        <div class="alert alert-success mt-3">@mensagem</div>
+        <div class="alert alert-success mt-3">
+            @mensagem
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(erro))
+    {
+        <div class="alert alert-danger mt-3">
+            @erro
+        </div>
     }
 </EditForm>
 
 @code {
-    Livro livro = new() { Disponivel = true };
-    string mensagem = "";
+    private const long TamanhoMaximo = 5 * 1024 * 1024;
 
-    async Task CadastroLivro()
+    private Livro livro = new()
     {
-        await LivroService.CadastroLivro(livro);
-        livro = new() { Disponivel = true };
-        mensagem = "Livro cadastrado com sucesso!";
+        Disponivel = true
+    };
+
+    private IBrowserFile? capaSelecionada;
+    private string? previewUrl;
+    private string mensagem = "";
+    private string erro = "";
+    private bool salvando;
+
+    private async Task SelecionarCapa(
+        InputFileChangeEventArgs e)
+    {
+        mensagem = "";
+        erro = "";
+        previewUrl = null;
+
+        var arquivo = e.File;
+
+        string[] tiposPermitidos =
+        {
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        };
+
+        if (!tiposPermitidos.Contains(arquivo.ContentType))
+        {
+            capaSelecionada = null;
+            erro = "Selecione uma imagem JPG, PNG ou WEBP.";
+            return;
+        }
+
+        if (arquivo.Size > TamanhoMaximo)
+        {
+            capaSelecionada = null;
+            erro = "A imagem não pode ultrapassar 5 MB.";
+            return;
+        }
+
+        capaSelecionada = arquivo;
+
+        await using var stream =
+            arquivo.OpenReadStream(TamanhoMaximo);
+
+        using var memoria = new MemoryStream();
+
+        await stream.CopyToAsync(memoria);
+
+        previewUrl =
+            $"data:{arquivo.ContentType};base64," +
+            Convert.ToBase64String(memoria.ToArray());
+    }
+
+    private async Task CadastroLivro()
+    {
+        mensagem = "";
+        erro = "";
+        salvando = true;
+
+        try
+        {
+            if (capaSelecionada != null)
+            {
+                await using var stream =
+                    capaSelecionada.OpenReadStream(TamanhoMaximo);
+
+                livro.CapaChave =
+                    await S3Service.EnviarCapaAsync(
+                        stream,
+                        capaSelecionada.Name,
+                        capaSelecionada.ContentType);
+            }
+
+            await LivroService.CadastroLivro(livro);
+
+            livro = new Livro
+            {
+                Disponivel = true
+            };
+
+            capaSelecionada = null;
+            previewUrl = null;
+
+            mensagem = "Livro cadastrado com sucesso!";
+        }
+        catch (Exception ex)
+        {
+            erro =
+                $"Não foi possível cadastrar o livro: {ex.Message}";
+        }
+        finally
+        {
+            salvando = false;
+        }
     }
 }
